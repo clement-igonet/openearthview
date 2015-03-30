@@ -19,6 +19,7 @@ var zoom = 0;
 var zoomOld = 0;
 var curViewPoint;
 var rotationCenter;
+var zoomDelta = 2;
 //var cameraTransform;
 //var viewpointGround;
 document.onload = function () {
@@ -225,26 +226,26 @@ Osm2X3dGround.prototype.updateScene = function () {
 //        transform.setAttribute('rotation', "1 0 0 -1.5708");
         transform.appendChild(shape);
         group.appendChild(transform);
-        if (zoom > 17) {
-            inline = document.createElement('inline');
-            inline.setAttribute('id', 'x3dTile');
-            inline.setAttribute('nameSpaceName', 'myX3d');
-
-            var url = 'osm2x3d.php?'
-                    + 'zoom=' + zoom
-                    + '&xtile=' + tiles[k].xtile
-                    + '&ytile=' + tiles[k].ytile;
-
-            inline.setAttribute('url', url);
-            x3dom.debug.doLog('url: ' + url, x3dom.debug.INFO);
-
-            transform = document.createElement('Transform');
-            transform.setAttribute(
-                    'translation', translation_);
-            transform.setAttribute('rotation', "1 0 0 1.5708");
-            transform.appendChild(inline);
-            group.appendChild(transform);
-        }
+//        if (zoom > 17) {
+//            inline = document.createElement('inline');
+//            inline.setAttribute('id', 'x3dTile');
+//            inline.setAttribute('nameSpaceName', 'myX3d');
+//
+//            var url = 'osm2x3d.php?'
+//                    + 'zoom=' + zoom
+//                    + '&xtile=' + tiles[k].xtile
+//                    + '&ytile=' + tiles[k].ytile;
+//
+//            inline.setAttribute('url', url);
+//            x3dom.debug.doLog('url: ' + url, x3dom.debug.INFO);
+//
+//            transform = document.createElement('Transform');
+//            transform.setAttribute(
+//                    'translation', translation_);
+//            transform.setAttribute('rotation', "1 0 0 1.5708");
+//            transform.appendChild(inline);
+//            group.appendChild(transform);
+//        }
 
     }
 
@@ -299,10 +300,13 @@ function view_changed(e) {
     x3dom.debug.doLog('tileSize: ' + tileSize, x3dom.debug.INFO);
     x3dom.debug.doLog('rotationCenter: ' + rotationCenter, x3dom.debug.INFO);
     if (
+//            (Math.abs(zoom - zoomOld) >= zoomDelta) ||
             (Math.abs(zoom - zoomOld) >= 2) ||
-            (Math.abs(rotationCenter.x) > tileSize || Math.abs(rotationCenter.z) > tileSize)
+//            (Math.abs(rotationCenter.x) > tileSize || Math.abs(rotationCenter.z) > tileSize)
+            (zoom > 15 && zoom > zoomOld)
             ) {
         zoomOld = zoom;
+        zoomDelta = (zoom > 15) ? 1 : 2;
         osm2X3d.updateView();
         osm2X3d.updateScene();
     }
@@ -444,10 +448,10 @@ Osm2X3d.processZoom = function (camCoord) {
             + Math.pow(camCoord.y, 2)
             + Math.pow(camCoord.z, 2);
     var rdist = Math.sqrt(rdist2);
-    var zoom = parseInt(Osm2X3d.myZConst - Math.log2(rdist / 1000.0));
-    var zoom = Math.min(zoom, 19);
-    var zoom = Math.max(zoom, 1);
-    return zoom;
+    var zoom_ = parseInt(Osm2X3d.myZConst - Math.log2(rdist / 1000.0));
+    zoom_ = Math.min(zoom_, 19);
+    zoom_ = Math.max(zoom_, 1);
+    return zoom_;
 }
 
 Osm2X3d.createGround = function (size, translation, zoom, xtile, ytile) {
