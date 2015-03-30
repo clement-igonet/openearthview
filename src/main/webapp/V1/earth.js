@@ -15,6 +15,10 @@ EARTH_CIRC = EARTH_RADIUS * 2 * Math.PI;
 TILE_SIZE = 256;
 Osm2X3d.myZConst = 17;
 var osm2X3d;
+var zoom = 0;
+var zoomOld = 0;
+var curViewPoint;
+var rotationCenter;
 //var cameraTransform;
 //var viewpointGround;
 document.onload = function () {
@@ -56,18 +60,17 @@ Osm2X3dGround.prototype.init = function () {
     navigationInfo.setAttribute('id', 'nav');
     navigationInfo.setAttribute('headlight', 'true');
     navigationInfo.setAttribute('type', 'turntable');
-    navigationInfo.setAttribute('typeParams', '0 0 0.0 1.56');
+    navigationInfo.setAttribute('typeParams', '0 0 0 1.56');
 //                navigationInfo.setAttribute('visibilityLimit', '0');
     navigationInfo.setAttribute('transitionType', 'TELEPORT');
     scene.appendChild(navigationInfo);
-
     self.viewpoint = document.createElement('Viewpoint');
     self.viewpoint.setAttribute('id', 'viewpointGround');
     self.viewpoint.setAttribute('orientation', '1 0 0 -1.57');
+//    self.viewpoint.setAttribute('orientation', '1 0 0 -1');
     self.viewpoint.setAttribute('position', '0 ' + self.elev + ' 0');
     self.cameraTransform.setAttribute('rotation', '0 1 0 0');
     self.cameraTransform.appendChild(self.viewpoint);
-
     scene.appendChild(self.cameraTransform);
 //    inline = document.createElement('inline');
 //    inline.setAttribute('nameSpaceName', 'myX3d');
@@ -82,6 +85,8 @@ Osm2X3dGround.prototype.init = function () {
 //    updateGroundView();
 
     self.viewpoint.addEventListener("viewpointChanged", view_changed, false);
+    curViewPoint = x3dElement.runtime.viewpoint();
+    rotationCenter = curViewPoint._vf.centerOfRotation;
     self.updateView();
     self.updateScene();
 }
@@ -90,8 +95,9 @@ Osm2X3dGround.prototype.updateView = function () {
     var self = this;
     var x3dElement = document.getElementById('x3dElement');
 //    var scene = document.getElementById("scene");
-    var curViewPoint = x3dElement.runtime.viewpoint();
-    var rotationCenter = curViewPoint._vf.centerOfRotation;
+//    curViewPoint = x3dElement.runtime.viewpoint();
+//    rotationCenter = curViewPoint._vf.centerOfRotation;
+
     var orientation;
     var lonDiff = (180 / Math.PI) * rotationCenter.x / EARTH_RADIUS;
     var latDiff = -(180 / Math.PI) * rotationCenter.z / EARTH_RADIUS;
@@ -128,7 +134,7 @@ Osm2X3dGround.prototype.updateView = function () {
 
 Osm2X3dGround.prototype.updateScene = function () {
     var self = this;
-    zoom = Osm2X3d.processZoom(self.camPos);
+//    zoom = Osm2X3d.processZoom(self.camPos);
     var xtile = Osm2X3d.long2xtile(self.lon, zoom);
     var ytile = Osm2X3d.lat2ytile(self.lat, zoom);
     x3dom.debug.doLog('xtile: ' + xtile, x3dom.debug.INFO);
@@ -151,11 +157,9 @@ Osm2X3dGround.prototype.updateScene = function () {
 
     var size = widthTile_3d + ' ' + heightTile_3d;
     var translation = (x_3d + widthTile_3d / 2) + ' 0 ' + (z_3d + heightTile_3d / 2);
-
     var tiles = [];
     var widthCanvas = x3dElement.runtime.getWidth();
     var heightCanvas = x3dElement.runtime.getHeight();
-
 //    var heightCanvas = 255;
 //    var widthCanvas = 255;
 
@@ -164,28 +168,31 @@ Osm2X3dGround.prototype.updateScene = function () {
 
     var xtileFloat = Osm2X3d.long2xtileFloat(self.lon, zoom);
     var ytileFloat = Osm2X3d.lat2ytileFloat(self.lat, zoom);
-
     var xtileCenter_2d = widthCanvas / 2 - (xtileFloat - xtile) * 256;
     var ytileCenter_2d = heightCanvas / 2 - (ytileFloat - ytile) * 256;
-
     var xtileShift = Math.floor((xtileCenter_2d + 255) / 256);
     var ytileShift = Math.floor((ytileCenter_2d + 255) / 256);
-
     var xtileUL_2d = xtileCenter_2d - (xtileShift * 256);
     var ytileUL_2d = ytileCenter_2d - (ytileShift * 256);
-
     var nTileWidth = Math.floor((widthCanvas - xtileUL_2d + 255) / 256);
     var nTileHeight = Math.floor((heightCanvas - ytileUL_2d + 255) / 256);
-
     var n = 0;
     for (i = 0; i < nTileWidth; i++) {
+        var xtileShift_ = i - xtileShift;
+        var xtile_ = xtile + xtileShift_;
+        if (xtile_ < 0 || xtile_ >= Math.pow(2, zoom)) {
+            continue;
+        }
         for (j = 0; j < nTileHeight; j++) {
-            var xtileShift_ = i - xtileShift;
             var ytileShift_ = j - ytileShift;
+            var ytile_ = ytile + ytileShift_;
+            if (ytile_ < 0 || ytile_ >= Math.pow(2, zoom)) {
+                continue;
+            }
             var tile = {
                 zoom: zoom,
-                xtile: xtile + xtileShift_,
-                ytile: ytile + ytileShift_
+                xtile: xtile_,
+                ytile: ytile_
             }
             tiles[n++] = tile;
 //            x3dom.debug.doLog('zoom: ' + tile.zoom, x3dom.debug.INFO);
@@ -218,27 +225,26 @@ Osm2X3dGround.prototype.updateScene = function () {
 //        transform.setAttribute('rotation', "1 0 0 -1.5708");
         transform.appendChild(shape);
         group.appendChild(transform);
-
-        if (zoom > 17) {
-            inline = document.createElement('inline');
-            inline.setAttribute('id', 'x3dTile');
-            inline.setAttribute('nameSpaceName', 'myX3d');
-            
-            var url = 'osm2x3d.php?'
-                    + 'zoom=' + zoom
-                    + '&xtile=' + tiles[k].xtile
-                    + '&ytile=' + tiles[k].ytile;
-
-            inline.setAttribute('url', url);
-            x3dom.debug.doLog('url: ' + url, x3dom.debug.INFO);
-
-            transform = document.createElement('Transform');
-            transform.setAttribute(
-                    'translation', translation_);
-            transform.setAttribute('rotation', "1 0 0 1.5708");
-            transform.appendChild(inline);
-            group.appendChild(transform);
-        }
+//        if (zoom > 17) {
+//            inline = document.createElement('inline');
+//            inline.setAttribute('id', 'x3dTile');
+//            inline.setAttribute('nameSpaceName', 'myX3d');
+//
+//            var url = 'osm2x3d.php?'
+//                    + 'zoom=' + zoom
+//                    + '&xtile=' + tiles[k].xtile
+//                    + '&ytile=' + tiles[k].ytile;
+//
+//            inline.setAttribute('url', url);
+//            x3dom.debug.doLog('url: ' + url, x3dom.debug.INFO);
+//
+//            transform = document.createElement('Transform');
+//            transform.setAttribute(
+//                    'translation', translation_);
+//            transform.setAttribute('rotation', "1 0 0 1.5708");
+//            transform.appendChild(inline);
+//            group.appendChild(transform);
+//        }
 
     }
 
@@ -283,10 +289,23 @@ function view_changed(e) {
     x3dom.debug.doLog('camPos: ' + osm2X3d.camPos, x3dom.debug.INFO);
     osm2X3d.camOri = e.orientation;
     x3dom.debug.doLog('camOri : ' + osm2X3d.camOri, x3dom.debug.INFO);
-
     x3dElement = document.getElementById('x3dElement');
     zoom = Osm2X3d.processZoom(osm2X3d.camPos);
     x3dom.debug.doLog('zoom: ' + zoom, x3dom.debug.INFO);
+    x3dom.debug.doLog('zoomOld: ' + zoomOld, x3dom.debug.INFO);
+    curViewPoint = x3dElement.runtime.viewpoint();
+    rotationCenter = curViewPoint._vf.centerOfRotation;
+    var tileSize = EARTH_CIRC / Math.pow(2, zoom + 1);
+    x3dom.debug.doLog('tileSize: ' + tileSize, x3dom.debug.INFO);
+    x3dom.debug.doLog('rotationCenter: ' + rotationCenter, x3dom.debug.INFO);
+    if (
+            (Math.abs(zoom - zoomOld) >= 2) ||
+            (Math.abs(rotationCenter.x) > tileSize || Math.abs(rotationCenter.z) > tileSize)
+            ) {
+        zoomOld = zoom;
+        osm2X3d.updateView();
+        osm2X3d.updateScene();
+    }
     // http://gis.stackexchange.com/questions/12991/how-to-calculate-distance-to-ground-of-all-18-osm-zoom-levels
     // http://wiki.openstreetmap.org/wiki/Zoom_levels
     // The distance represented by one pixel (S) is given by
