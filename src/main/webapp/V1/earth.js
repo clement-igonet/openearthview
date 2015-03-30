@@ -225,26 +225,26 @@ Osm2X3dGround.prototype.updateScene = function () {
 //        transform.setAttribute('rotation', "1 0 0 -1.5708");
         transform.appendChild(shape);
         group.appendChild(transform);
-//        if (zoom > 17) {
-//            inline = document.createElement('inline');
-//            inline.setAttribute('id', 'x3dTile');
-//            inline.setAttribute('nameSpaceName', 'myX3d');
-//
-//            var url = 'osm2x3d.php?'
-//                    + 'zoom=' + zoom
-//                    + '&xtile=' + tiles[k].xtile
-//                    + '&ytile=' + tiles[k].ytile;
-//
-//            inline.setAttribute('url', url);
-//            x3dom.debug.doLog('url: ' + url, x3dom.debug.INFO);
-//
-//            transform = document.createElement('Transform');
-//            transform.setAttribute(
-//                    'translation', translation_);
-//            transform.setAttribute('rotation', "1 0 0 1.5708");
-//            transform.appendChild(inline);
-//            group.appendChild(transform);
-//        }
+        if (zoom > 17) {
+            inline = document.createElement('inline');
+            inline.setAttribute('id', 'x3dTile');
+            inline.setAttribute('nameSpaceName', 'myX3d');
+
+            var url = 'osm2x3d.php?'
+                    + 'zoom=' + zoom
+                    + '&xtile=' + tiles[k].xtile
+                    + '&ytile=' + tiles[k].ytile;
+
+            inline.setAttribute('url', url);
+            x3dom.debug.doLog('url: ' + url, x3dom.debug.INFO);
+
+            transform = document.createElement('Transform');
+            transform.setAttribute(
+                    'translation', translation_);
+            transform.setAttribute('rotation', "1 0 0 1.5708");
+            transform.appendChild(inline);
+            group.appendChild(transform);
+        }
 
     }
 
