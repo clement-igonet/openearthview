@@ -112,55 +112,47 @@ Osm2X3dGround.prototype.updateView = function () {
 
 Osm2X3dGround.prototype.updateScene = function () {
     var self = this;
-    self.updateCoord(zoom);
     var sceneContent = document.getElementById('x3dTile');
     if (sceneContent) {
         sceneContent.parentNode.removeChild(sceneContent);
     }
-    var xtile = Osm2X3d.long2xtile(self.lon, zoom);
-    var ytile = Osm2X3d.lat2ytile(self.lat, zoom);
-    var lonTile = Osm2X3d.xtile2long(xtile, zoom);
-    var latTile = Osm2X3d.ytile2lat(ytile, zoom);
+
+//    for (zoomRel = 0; zoomRel < 1; zoomRel += 2) {
+    var zoom_ = zoom;
+    self.updateCoord(zoom_);
+    var group = document.createElement('Group');
+    var xtile = Osm2X3d.long2xtile(self.lon, zoom_);
+    var ytile = Osm2X3d.lat2ytile(self.lat, zoom_);
+    var lonTile = Osm2X3d.xtile2long(xtile, zoom_);
+    var latTile = Osm2X3d.ytile2lat(ytile, zoom_);
     var x_3d = EARTH_RADIUS * (lonTile - self.lon) * Math.PI / 180;
     var z_3d = EARTH_RADIUS * (self.lat - latTile) * Math.PI / 180;
-    var tileWidth_3d = EARTH_RADIUS * (Osm2X3d.zoom2lonSize(zoom)) * Math.PI / 180;
-    var tileHeight_3d = EARTH_RADIUS * (Osm2X3d.zoom2latSize(ytile, zoom)) * Math.PI / 180;
-    var tiles = [];
+    var tileWidth_3d = EARTH_RADIUS * (Osm2X3d.zoom2lonSize(zoom_)) * Math.PI / 180;
+    var tileHeight_3d = EARTH_RADIUS * (Osm2X3d.zoom2latSize(ytile, zoom_)) * Math.PI / 180;
     var n = 0;
-    var group = document.createElement('Group');
-    var transform;
-    for (zoomRel = 0; zoomRel < 1; zoomRel += 2) {
-        var zoom_ = zoom - zoomRel;
-        var xtileFloat = Osm2X3d.long2xtileFloat(self.lon, zoom_);
-        var ytileFloat = Osm2X3d.lat2ytileFloat(self.lat, zoom_);
-        var xtileUL = Math.floor((256 * (xtileFloat) - 127) / 256);
-        var ytileUL = Math.floor((256 * (ytileFloat) - 127) / 256);
-        for (i = 0; i < 2; i++) {
-            var xtile_ = xtileUL + i;
-            if (xtile_ < 0 || xtile_ >= Math.pow(2, zoom_)) {
+    var tiles = [];
+
+    var xtileFloat = Osm2X3d.long2xtileFloat(self.lon, zoom_);
+    var ytileFloat = Osm2X3d.lat2ytileFloat(self.lat, zoom_);
+    var xtileUL = Math.floor((256 * (xtileFloat) - 127) / 256);
+    var ytileUL = Math.floor((256 * (ytileFloat) - 127) / 256);
+    for (i = 0; i < 2; i++) {
+        var xtile_ = xtileUL + i;
+        if (xtile_ < 0 || xtile_ >= Math.pow(2, zoom_)) {
+            continue;
+        }
+        for (j = 0; j < 2; j++) {
+            var ytile_ = ytileUL + j;
+            if (ytile_ < 0 || ytile_ >= Math.pow(2, zoom_)) {
                 continue;
             }
-            for (j = 0; j < 2; j++) {
-                var ytile_ = ytileUL + j;
-                if (ytile_ < 0 || ytile_ >= Math.pow(2, zoom_)) {
-                    continue;
-                }
-                var tile = {
-                    zoom: zoom_,
-                    xtile: xtile_,
-                    ytile: ytile_
-                }
-                tiles[n++] = tile;
-//                x3dom.debug.doLog('tile: ' + tile.zoom + ' ' + tile.xtile + ' ' + tile.ytile, x3dom.debug.INFO);
-
-
-
-
-
-
-
-
+            var tile = {
+                zoom: zoom_,
+                xtile: xtile_,
+                ytile: ytile_
             }
+            tiles[n++] = tile;
+//                x3dom.debug.doLog('tile: ' + tile.zoom + ' ' + tile.xtile + ' ' + tile.ytile, x3dom.debug.INFO);
         }
     }
 
@@ -171,24 +163,19 @@ Osm2X3dGround.prototype.updateScene = function () {
         }
         var xtile_ = Osm2X3d.long2xtile(self.lon, tiles[k].zoom);
         var ytile_ = Osm2X3d.lat2ytile(self.lat, tiles[k].zoom);
-//        var tileWidth_3d_ = EARTH_RADIUS * (Osm2X3d.zoom2lonSize(tiles[k].zoom)) * Math.PI / 180;
-//        var tileHeight_3d_ = EARTH_RADIUS * (Osm2X3d.zoom2latSize(tiles[k].ytile, tiles[k].zoom)) * Math.PI / 180;
         var imageTexture = document.createElement('ImageTexture');
         var url = 'http://a.tile.openstreetmap.org/'
                 + tiles[k].zoom + '/' + tiles[k].xtile + '/' + tiles[k].ytile + '.png';
         imageTexture.setAttribute('url', url);
-//        x3dom.debug.doLog('url: ' + url, x3dom.debug.INFO);
         var appearance = document.createElement('Appearance');
         appearance.appendChild(imageTexture);
         var rectangle = document.createElement('Rectangle2D');
-        rectangle.setAttribute('size',
-                (tileWidth_3d * Math.pow(2, (zoom - tiles[k].zoom))) + ' '
-                + (tileHeight_3d * Math.pow(2, (zoom - tiles[k].zoom))));
+        rectangle.setAttribute('size', tileWidth_3d + ' ' + tileHeight_3d);
         var shape = document.createElement('Shape');
         shape.appendChild(appearance);
         shape.appendChild(rectangle);
-        transform = document.createElement('Transform');
-        var translation_ = (tileWidth_3d * (tiles[k].xtile - xtile_)) * Math.pow(2, (zoom - tiles[k].zoom)) + ' ' + -(tileHeight_3d * (tiles[k].ytile - ytile_) * Math.pow(2, (zoom - tiles[k].zoom))) + ' 0';
+        var transform = document.createElement('Transform');
+        var translation_ = (tileWidth_3d * (tiles[k].xtile - xtile_)) + ' ' + -(tileHeight_3d * (tiles[k].ytile - ytile_)) + ' 0';
         x3dom.debug.doLog('translation_: ' + translation_, x3dom.debug.INFO);
         transform.setAttribute('translation', translation_);
         transform.appendChild(shape);
@@ -219,6 +206,7 @@ Osm2X3dGround.prototype.updateScene = function () {
     mainTransform.setAttribute('rotation', "1 0 0 -1.5708");
     mainTransform.appendChild(group);
     scene.appendChild(mainTransform);
+//    }
 }
 
 function view_changed(e) {
@@ -240,7 +228,7 @@ function view_changed(e) {
 //    }
 }
 
-Osm2X3dGround.prototype.updateCoord = function (zoom) {
+Osm2X3dGround.prototype.updateCoord = function (zoom_) {
     var coordTrans = document.getElementById('coordTrans');
     if (coordTrans) {
         scene.removeChild(coordTrans);
@@ -248,7 +236,7 @@ Osm2X3dGround.prototype.updateCoord = function (zoom) {
 
     coordinate = document.createElement('Coordinate');
     coordinate.setAttribute('id', 'coordinate');
-    var fact = Math.pow(2, zoom);
+    var fact = Math.pow(2, zoom_);
     var zzz = '0 0 0 ' + 40000000 / fact + ' 0 0 0 ' + 40000000 / fact + ' 0 0 0 ' + 40000000 / fact;
     x3dom.debug.doLog('zzz: ' + zzz, x3dom.debug.INFO);
     coordinate.setAttribute('point', zzz);
@@ -267,69 +255,6 @@ Osm2X3dGround.prototype.updateCoord = function (zoom) {
     transformC.setAttribute('id', 'coordTrans');
     transformC.appendChild(shape);
     scene.appendChild(transformC);
-}
-
-function Osm2X3dEarth() {
-}
-Osm2X3dEarth.prototype.init = function () {
-    var self = this;
-    navigationInfo = document.createElement('NavigationInfo');
-    navigationInfo.setAttribute('id', 'nav');
-    navigationInfo.setAttribute('headlight', 'true');
-    navigationInfo.setAttribute('type', 'turntable');
-    navigationInfo.setAttribute('typeParams', '0 0 1.57 3.14');
-    navigationInfo.setAttribute('visibilityLimit', '0');
-    navigationInfo.setAttribute('transitionType', 'TELEPORT');
-    scene.appendChild(navigationInfo);
-    self.viewpoint = document.createElement('Viewpoint');
-    self.viewpoint.setAttribute('id', 'viewpointEarth');
-    viewpoint.setAttribute('position', '0 0 300000');
-    scene.appendChild(viewpoint);
-    inline = document.createElement('inline');
-    inline.setAttribute('nameSpaceName', 'myX3d');
-    inline.setAttribute('url', './earth.x3d');
-    scene.appendChild(inline);
-    viewpoint.addEventListener("viewpointChanged", view_earth_changed, false);
-}
-
-Osm2X3dEarth.prototype.view_changed = function (e) {
-//                var NTInfo;
-//                var infoPane;
-//                NTInfo = x3dom.docs.getNodeTreeInfo();
-//                infoPane = document.getElementById('info');
-//                infoPane.innerHTML = NTInfo;
-//                if (reloadNeeded) {
-//                    reloadNeeded = false;
-//                    x3dom.reload();
-//                    document.getElementById('x3dElement').setAttribute('showlog', 'true');
-//                }
-    var pos = e.position;
-    x3dom.debug.doLog('viewpoint position: ' + pos, x3dom.debug.INFO);
-    rdist2 = Math.pow(pos.x, 2) + Math.pow(pos.y, 2) + Math.pow(pos.z, 2);
-    rdist = Math.sqrt(rdist2);
-    x3dom.debug.doLog('radial distance: ' + rdist, x3dom.debug.INFO);
-//                myX3dMode = "ground";
-    self.lon = Math.atan(pos.x / pos.z) * 180.0 / Math.PI;
-    self.lat = Math.acos(pos.y / rdist) * 180.0 / Math.PI;
-    x3dom.debug.doLog('lon: ' + self.lon, x3dom.debug.INFO);
-    x3dom.debug.doLog('lat: ' + self.lat, x3dom.debug.INFO);
-//                document.getElementById('inlineEarth').setAttribute('render', "false");
-//
-//                inlineGround = document.createElement('inline');
-//                inlineGround.setAttribute('id', 'myInlineGroundId');
-//                inlineGround.setAttribute('nameSpaceName', 'myInlineGround');
-//                inlineGround.setAttribute('url', './ground.x3d');
-//                inlineGround.setAttribute('load', 'true');
-//                scene.appendChild(inlineGround);
-//
-//                viewpointGround = document.getElementById('viewpointGround');
-//                
-//                    position = viewpointGround.getAttribute('position');
-//                    position.x = 0;
-//                    position.y = 0;
-//                    position.z = rdist - EARTH_RADIUS;
-//                viewpointGround.setAttribute('position', '0 0 ' + (rdist - EARTH_RADIUS));
-//                viewpointGround.setAttribute('set_bind', 'true');
 }
 
 function Osm2X3d() {

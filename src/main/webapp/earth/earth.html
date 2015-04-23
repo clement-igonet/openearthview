@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8"> 
+        <title>OSM2X3D</title>
+        <!--<script src="http://www.x3dom.org/download/dev/x3dom-full.js"></script>-->
+        <script src="http://www.x3dom.org/download/1.6.2/x3dom-full.js"></script>
+
+        <script src="earth.js"></script>
+        <!--<link rel="stylesheet" href="http://www.x3dom.org/download/dev/x3dom.css">-->
+        <link rel="stylesheet" href="http://www.x3dom.org/download/1.6.2/x3dom.css">
+
+        <!--<link rel='stylesheet' type='text/css' href='style.css'></link>-->
+        <link rel='stylesheet' type='text/css' href='earth.css'></link>
+    </head>
+    <body id="body">
+        <div id="header">
+            osm2x3d
+        </div>
+        <div id="container">
+            <x3d id="x3dElement" showlog="true" showstat="false">
+                <Scene id="scene">
+                    <!--                                        <Background
+                                                                groundColor='0 0 0'
+                                                                backUrl='"space_1_back.jpg"'
+                                                                bottomUrl='"space_1_bottom.jpg"'
+                                                                frontUrl='"space_1_front.jpg"'
+                                                                leftUrl='"space_1_left.jpg"'
+                                                                rightUrl='"space_1_right.jpg"'
+                                                                topUrl='"space_1_top.jpg"'/>-->
+
+                    <!--                    <navigationInfo id='nav' headlight='true' type='turntable' typeParams="0 0 0.0 3.14"></navigationInfo>
+                                        <navigationInfo id='nav' headlight='true' type='turntable'"></navigationInfo>
+                                        <Transform rotation='1 0 0 1.57' translation='0 0 0'>
+                                            <Viewpoint description='Open Earth View' orientation='1 0 0 -1.57' position='0 130000 0'/>
+                                        </Transform>-->
+<!--
+                    <Transform id="earthTransform" translation='0 0 0'>        
+                        <Shape>
+                            <Appearance>
+                                <ImageTexture
+                                    url='"earth_big.png"'
+                                    repeatS='true' 
+                                    repeatT='true'
+                                    scale='true' />
+                            </Appearance>
+                            <Sphere solid='true' radius="65000.0"/>
+                            <SphereSegment latitude='-90 -45 0 45 90' longitude='180 225 270 315 360' solid='false' radius="65000.0"></SphereSegment>
+                        </Shape>
+                    </Transform>    
+                    -->
+                    <!--
+                            <shape> 
+                                <appearance> 
+                                    <material diffuseColor='1 1 0'></material> 
+                                </appearance> 
+                                <SphereSegment latitude='-90 -45 0 45 90' longitude='180 225 270 315 360' solid='false'></SphereSegment>
+                            </shape> 
+                    -->
+
+
+                </Scene>             
+            </x3d>
+        </div>    
+        <div id="content"> info </div>
+    </body>
+</html>
+

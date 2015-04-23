@@ -4,14 +4,6 @@
     <head>
         <meta name='title' content='Figure17.04dTextureSphereTest.x3d'/>
         <meta name='creator' content='Figure 17.4d, The VRML 2.0 Sourcebook, Copyright [1997] By Andrea L. Ames, David R. Nadeau, and John L. Moreland'/>
-        <meta name='reference' content=' http://www.wiley.com/legacy/compbooks/vrml2sbk/ch17/17fig04d.htm '/>
-        <meta name='translator' content='Don Brutzman'/>
-        <meta name='created' content='27 August 2000'/>
-        <meta name='modified' content='15 January 2011'/>
-        <meta name='description' content='A texture-mapped Sphere. Compare Figure17.04aTextureBoxTest, Figure17.04bTextureConeTest, Figure17.04cTextureCylinderTest and Figure17.04dTextureSphereTest.'/>
-        <meta name='identifier' content=' http://www.web3d.org/x3d/content/examples/Vrml2.0Sourcebook/Chapter17-Textures/Figure17.04dTextureSphereTest.x3d '/>
-        <meta name='generator' content='X3D-Edit 3.3, https://savage.nps.edu/X3D-Edit'/>
-        <meta name='license' content=' ../../license.html'/>
     </head>
     <!--
     Index for Viewpoint image : Viewpoint_1
