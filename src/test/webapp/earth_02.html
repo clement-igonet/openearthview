@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8"> 
+        <title>OSM2X3D</title>
+        <script type="text/javascript" src="http://www.x3dom.org/download/1.6.2/x3dom-full.js"/>
+        <script src="earth.js"></script>
+        <link rel="stylesheet" type="text/css" href="http://www.x3dom.org/download/1.6.2/x3dom.css">
+        <link rel='stylesheet' type='text/css' href='earth.css'/>
+    </head>
+    <body id="body">
+        <div id="header">
+            osm2x3d
+        </div>
+        <div id="container">
+            <X3D id="rootX3dElement" showStat="false" showLog="true" showProgress="bar"
+                 profile="Immersive" version="3.0" width="100%" height="600px">
+                <Scene render="true" bboxCenter="0,0,0" bboxSize="-1,-1,-1" pickMode="idBuf" doPickPass="true">
+                    <Group>
+                        <Background groundColor='0 0 0' skyColor='1 1 1'/>
+                        <GeoViewpoint
+                            geoSystem="&quot;GD&quot;"
+                            description='Initial GeoViewpoint'
+                            orientation='1 0 0 -1.57'
+                            position='51.5122 -40.0 10000000'
+                            containerField='children'/>
+                        <Shape>
+                            <!--                            <Appearance>
+                                                            <Material diffuseColor='0.8 1.0 0.3'/>
+                                                            <ImageTexture url='"images/earth3.png"'/>
+                                                        </Appearance>-->
+                            <Appearance sortType="auto" alphaClipThreshold="0.1">
+                                <Material diffuseColor="1 0 0" ambientIntensity="0.2" emissiveColor="0,0,0" shininess="0.2" specularColor="0,0,0"></Material>
+                            </Appearance>
+
+                            <GeoElevationGrid
+                                creaseAngle='1.05'
+                                geoGridOrigin='-90 -180 0'
+                                height='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0' xDimension='11' xSpacing='36' yScale='1.0' zDimension='11' zSpacing='18'/>
+                        </Shape>
+                        <GeoLocation geoCoords='57.7174 -3.286119 200000' containerField='children'>
+                            <Transform rotation='1 0 0 3.1415926'>
+                                <Shape>
+                                    <Appearance>
+                                        <Material diffuseColor='1 1 0'/>
+                                    </Appearance>
+                                    <Cone bottomRadius='100000' height='500000'/>
+                                </Shape>
+                            </Transform>
+                        </GeoLocation>
+                    </Group>
+                </Scene>             
+            </X3D>
+        </div>    
+        <div id="content"> info </div>
+    </body>
+</html>
